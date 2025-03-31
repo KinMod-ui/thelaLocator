@@ -95,11 +95,12 @@ func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		helper.Mylog.Printf("Error %s when upgrading connection to websocket", err)
 		return
 	}
+
 	usrCntG++
 	usrCnt := usrCntG
 	defer c.Close()
 
-	helper.Mylog.Println("Connected to :", r.RemoteAddr)
+	helper.Mylog.Println("Connected to : ", r.RemoteAddr, " usrCnt : ", usrCnt, " usrCntG", usrCntG)
 
 	rdb := makeRedisClient()
 
@@ -154,8 +155,7 @@ func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				friendId := locStr[3]
 				helper.Mylog.Println("the Haversine distance of ", friendId, " and ", usrCnt, " : ", helper.Haversine(lat, long, friendLat, friendLong))
 				if helper.Haversine(lat, long, friendLat, friendLong) < 10.0 {
-					helper.Mylog.Printf("[%s] friend is in radius. Mate him %s", friendId,
-						strconv.Itoa(usrCnt))
+					helper.Mylog.Printf("%s", friendId)
 
 					response := fmt.Sprintf("[%s] friend is in radius. Mate him %s",
 						friendId, strconv.Itoa(usrCnt))
@@ -210,7 +210,7 @@ func setupHTTPServer(port string) {
 	mux.Handle("/", http.HandlerFunc(serveHTTP))
 
 	server := &http.Server{
-		Addr:    ":" + port,
+		Addr:    "127.0.0.1:" + port,
 		Handler: mux,
 	}
 
@@ -220,7 +220,7 @@ func setupHTTPServer(port string) {
 
 func SetupWSServer(port string) {
 
-	go setupHTTPServer(port)
+	//go setupHTTPServer(port)
 	helper.Mylog.Println("Reached here for port : ", port)
 	connPool, err := pgxpool.NewWithConfig(context.Background(), db.Config())
 
@@ -254,7 +254,7 @@ func SetupWSServer(port string) {
 	mux.Handle("/", webSocketHandler)
 
 	server := &http.Server{
-		Addr:    ":" + port,
+		Addr:    "127.0.0.1:" + port,
 		Handler: mux,
 	}
 
