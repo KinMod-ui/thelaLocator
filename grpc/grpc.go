@@ -1,4 +1,4 @@
-package websockets
+package grpc
 
 import (
 	"context"
@@ -9,34 +9,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KinMod-ui/thelaLocator/db"
 	"github.com/KinMod-ui/thelaLocator/helper"
+	"github.com/KinMod-ui/thelaLocator/pkg/db"
+	"github.com/KinMod-ui/thelaLocator/pkg/redis"
 
-	"github.com/go-redis/redis/v8"
-	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 )
 
-type webSocketHandler struct {
-	upgrader websocket.Upgrader
-	dbPool   *pgxpool.Conn
-}
-
-func makeRedisClient() *redis.Client {
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // default DB
-	})
-
-	return rdb
-}
-
 func (wsh webSocketHandler) findFriends(fid string, rdb *redis.Client) []string {
 
-	helper.Mylog.Println("reached here")
 	var ctx = context.Background()
 
 	retFriends := []string{}
